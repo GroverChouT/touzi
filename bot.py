@@ -127,16 +127,21 @@ def coc7stats(bot: Bot, update: Update, args: List[str]):
     elif dex > siz and str_ > siz:
         mov = 9
 
+    edu_enhance_track = []
+
     def edu_enhance(e: int):
         if d100.roll() > e:
-            e += d10.roll()
+            delta = d10.roll()
+            e += delta
+            edu_enhance_track.append(delta)
         return min(99, e)
 
     warning = ""
     if age < 15:
         warning = "小于十五岁的调查员需要咨询KP调整属性值"
     elif age < 20:
-        warning = "请将力量和体型合计减 5 点。"
+        warning = "请将力量和体型合计减 5 点。\n\n幸运已投掷两次取了大值（可放弃） {} {}"\
+            .format(luck, luck2)
         luck = max(luck, luck2)
     elif age < 40:
         edu = edu_enhance(edu)
@@ -207,6 +212,8 @@ def coc7stats(bot: Bot, update: Update, args: List[str]):
     '''.format(warning, str=str_, dex=dex, int=int_, con=con, app=app, pow=pow_,
                siz=siz, edu=edu, mov=mov, luck=luck, hp=(siz+con)//10, mp=pow_//5,
                build=build, db=db)
+    if len(edu_enhance_track):
+        stats += "\n教育每次加值： {}".format(", ".join(map(str, edu_enhance_track)))
     bot.send_message(chat_id, stats, parse_mode='Markdown')
 
 
