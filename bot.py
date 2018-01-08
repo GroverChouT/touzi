@@ -199,9 +199,9 @@ def coc7stats(bot: Bot, update: Update, args: List[str]):
 意志  POW: {pow:2}
 幸运 Luck: {luck:2}
 
-体力 HP: {hp:2}
+体力  HP: {hp:2}
 理智 SAN: {pow:2}
-魔法 MP: {mp:2}
+魔法  MP: {mp:2}
 移动力 MOV: {mov:2}
 体格 Build: {build:2}
 伤害加值 DB: {db:2}
