@@ -77,6 +77,28 @@ class FateDice(Dice):
         return "{}×FATE {} sum: `{}`".format(len(roll_result), result, sum(roll_result))
 
 
+def db_and_build(str_: int, siz: int) -> (str, int):
+    a = str_ + siz
+    if a < 65:
+        return '-2', -2
+    elif a < 85:
+        return '-1', -1
+    elif a < 125:
+        return '0', 0
+    elif a < 165:
+        return '+1d4', 1
+    elif a < 205:
+        return '+1d6', 2
+    elif a < 285:
+        return '+2d6', 3
+    elif a < 365:
+        return '+3d6', 4
+    elif a < 445:
+        return '+4d6', 5
+    else:
+        return '+5d6', 6
+
+
 def coc7stats(bot: Bot, update: Update, args: List[str]):
     chat_id = update.message.chat_id
 
@@ -158,19 +180,33 @@ def coc7stats(bot: Bot, update: Update, args: List[str]):
     else:
         warning = "大于九十岁的调查员请询问KP"
 
+    db, build = db_and_build(str_, siz)
+
     stats = '''
 ```
-力量  STR: {:2} 敏捷 DEX: {:2} 智力 INT: {:2}
-体质  CON: {:2} 外表 APP: {:2} 意志 POW: {:2}
-体形  SIZ: {:2} 教育 EDU: {:2} 移动 MOV: {:2}
-幸运 Luck: {:2}
+力量  STR: {str:2}  
+体质  CON: {con:2}
+体形  SIZ: {siz:2}  
+敏捷  DEX: {dex:2}
+外表  APP: {app:2}
+教育  EDU: {edu:2}
+智力  INT: {int:2}
+意志  POW: {pow:2}
+幸运 Luck: {luck:2}
 
-体力 HP: {:2} 理智 SAN: {:2} 魔法 MP: {:2}
+体力 HP: {hp:2}
+理智 SAN: {pow:2}
+魔法 MP: {mp:2}
+移动力 MOV: {mov:2}
+体格 Build: {build:2}
+伤害加值 DB: {db:2}
 ```
 
 已根据年龄调整了教育、移动力以及幸运。
-{}
-    '''.format(str_, dex, int_, con, app, pow_, siz, edu, mov, luck, (siz+con)//10, pow_, pow_//5, warning)
+{0}
+    '''.format(warning, str=str_, dex=dex, int=int_, con=con, app=app, pow=pow_,
+               siz=siz, edu=edu, mov=mov, luck=luck, hp=(siz+con)//10, mp=pow_//5,
+               build=build, db=db)
     bot.send_message(chat_id, stats, parse_mode='Markdown')
 
 
