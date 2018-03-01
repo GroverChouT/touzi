@@ -270,7 +270,7 @@ def main():
     dispatcher.add_handler(CommandHandler('coc7stats', coc7stats, pass_args=True))
     dispatcher.add_handler(
         CommandHandler('set_default_dice', set_default_dice, pass_args=True, pass_chat_data=True))
-
+    updater.start_polling()
     updater.idle()
 
 
