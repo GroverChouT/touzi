@@ -1,4 +1,5 @@
 import os
+import sys
 import telegram
 import secrets
 import logging
@@ -12,16 +13,12 @@ from typing import List
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
-with open('token.txt') as f:
-    BOT_TOKEN = f.read()
-
 DICE_TYPE_PATTERN = re.compile('^d(\d+)')
 DICE_ROLL_PATTERN = re.compile('^(\d+)d(\d+)$')
 FATE_ROLL_PATTERN = re.compile('^(\d+)d$')
 
 MAX_FACE = 1000
 MAX_NUM = 200
-WEB_HOOK = False
 
 
 class UnsupportedDice(Exception):
@@ -267,18 +264,13 @@ def command_roll(bot: Bot, update: Update, args: [str], chat_data: dict):
 
 
 def main():
-    updater = Updater(token=BOT_TOKEN)
+    updater = Updater(token=sys.argv[1])
     dispatcher = updater.dispatcher
-
     dispatcher.add_handler(CommandHandler('r', command_roll, pass_args=True, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('coc7stats', coc7stats, pass_args=True))
     dispatcher.add_handler(
         CommandHandler('set_default_dice', set_default_dice, pass_args=True, pass_chat_data=True))
-    if WEB_HOOK:
-        # TODO: work in processing.
-        updater.start_webhook(listen='127.0.0.1', port=5000, url_path=BOT_TOKEN)
-    else:
-        updater.start_polling()
+
     updater.idle()
 
 
