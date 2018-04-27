@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import secrets
@@ -8,6 +9,12 @@ from telegram.ext import Updater, CommandHandler
 
 MAX_FACE = 1000
 MAX_NUM = 200
+
+# Enable logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 class UnsupportedDice(Exception):
@@ -60,21 +67,34 @@ def db_and_build(stats: dict):
     stats['build'] = build
 
 
+def random_age() -> int:
+    age = 100
+    for _ in range(5):
+        age = min(secrets.randbelow(65) + 15, age)
+    return age
+
+
 def coc7stats(bot: Bot, update: Update, args: List[str]):
     chat_id = update.message.chat_id
-    age = int(args[0])
-    if len(args) != 1 or not args[0].isnumeric():
+    warning = ""
+
+    if len(args) == 0:
+        age = random_age()
+        warning += '你没有指定年龄，就当你是{}岁好了\n'.format(age)
+    elif len(args) != 1 or not args[0].isnumeric():
         bot.send_message(chat_id,
                          "召唤方式错误哦，只需要跟一个年龄参数，像这样 `/coc7 18` 。",
                          parse_mode='Markdown')
         return
+    else:
+        age = int(args[0])
 
     d6 = Dice(6)
     d10 = Dice(10)
     d100 = Dice(100)
 
     stats = {
-        "age": int(args[0]),
+        "age": age,
         "str": sum(d6.roll_n(3)) * 5,
         "con": sum(d6.roll_n(3)) * 5,
         "dex": sum(d6.roll_n(3)) * 5,
@@ -102,46 +122,46 @@ def coc7stats(bot: Bot, update: Update, args: List[str]):
                 track.append(delta)
         return min(99, edu)
 
-    warning = ""
     if age < 15:
-        warning = "小于十五岁的调查员需要咨询KP调整属性值"
+        warning += "小于十五岁的调查员需要咨询KP调整属性值"
     elif age < 20:
-        warning = "请将力量和体型合计减 5 点。\n\n幸运已投掷两次取了大值（可放弃） {} {}" \
+        warning += "请将力量和体型合计减 5 点。\n\n幸运已投掷两次取了大值（可放弃） {} {}" \
             .format(stats['luck'], stats['luck2'])
         stats['luck'] = max(stats['luck'], stats['luck2'])
     elif age < 40:
         stats['edu'] = edu_enhance(1, stats['edu'])
     elif age < 50:
-        warning = "请将力量、敏捷和体质合计减 5 点。"
+        warning += "请将力量、敏捷和体质合计减 5 点。"
         stats['app'] -= 5
         stats['mov'] -= 1
         stats['edu'] = edu_enhance(2, stats['edu'])
     elif age < 60:
-        warning = "请将力量、敏捷和体质合计减 10 点。"
+        warning += "请将力量、敏捷和体质合计减 10 点。"
         stats['app'] -= 10
         stats['mov'] -= 2
         stats['edu'] = edu_enhance(3, stats['edu'])
     elif age < 70:
-        warning = "请将力量、敏捷和体质合计减 20 点。"
+        warning += "请将力量、敏捷和体质合计减 20 点。"
         stats['app'] -= 15
         stats['mov'] -= 3
         stats['edu'] = edu_enhance(4, stats['edu'])
     elif age < 80:
-        warning = "请将力量、敏捷和体质合计减 40 点。"
+        warning += "请将力量、敏捷和体质合计减 40 点。"
         stats['app'] -= 20
         stats['mov'] -= 4
         stats['edu'] = edu_enhance(4, stats['edu'])
     elif age <= 90:
-        warning = "请将力量、敏捷和体质合计减 80 点。"
+        warning += "请将力量、敏捷和体质合计减 80 点。"
         stats['app'] -= 25
         stats['mov'] -= 5
         stats['edu'] = edu_enhance(4, stats['edu'])
     else:
-        warning = "大于九十岁的调查员请询问KP"
-
+        warning += "大于九十岁的调查员请询问KP"
     db_and_build(stats)
     stats['hp'] = (stats['size'] + stats['con']) // 10
-    stats['mp'] = stats['pow'] // 5
+
+    stats['mp'] = stats['pow_'] // 5
+
     stats_text = '''
 ```
 力量  STR: {str:2}  
@@ -151,11 +171,11 @@ def coc7stats(bot: Bot, update: Update, args: List[str]):
 外表  APP: {app:2}
 教育  EDU: {edu:2}
 智力  INT: {int:2}
-意志  POW: {pow:2}
+意志  POW: {pow_:2}
 幸运 Luck: {luck:2}
 
 体力  HP: {hp:2}
-理智 SAN: {pow:2}
+理智 SAN: {pow_:2}
 魔法  MP: {mp:2}
 移动力 MOV: {mov:2}
 体格 Build: {build:2}
@@ -234,6 +254,11 @@ def command_roll(bot: Bot, update: Update, args: [str], chat_data: dict):
                      reply_to_message_id=msg.message_id, parse_mode='Markdown')
 
 
+def error(bot, update, error):
+    """Log Errors caused by Updates."""
+    logger.warning('Update "%s" caused error "%s"', update, error)
+
+
 def main():
     updater = Updater(token=os.environ['BOT_TOKEN'])
     dispatcher = updater.dispatcher
@@ -241,6 +266,7 @@ def main():
     dispatcher.add_handler(CommandHandler('coc7', coc7stats, pass_args=True))
     dispatcher.add_handler(
         CommandHandler('setdice', set_default_dice, pass_args=True, pass_chat_data=True))
+    dispatcher.add_error_handler(error)
     updater.start_polling()
     updater.idle()
 
