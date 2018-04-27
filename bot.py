@@ -344,7 +344,7 @@ def coc_trait(bot: Bot, update: Update):
     mbti = ''.join(map(choice, mbti_list))
     luck_number = list(map(lambda x: x + 1, range(20))) + [42]
 
-    characters_war_list = (('明日香', '绫波丽', '美里'), ('东马', '雪菜'), ('02', '015'), ('养鸡', '养女'))
+    characters_war_list = (('明日香', '绫波丽', '美里'), ('冬马', '雪菜'), ('02', '015'), ('养鸡', '养女'))
     characters_war_result = '/'.join(map(choice, characters_war_list))
     message = '''自动生成的人物特征，仅供参考，部分采纳，不要照单全收。
 
