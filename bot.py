@@ -364,6 +364,11 @@ def coc_trait(bot: Bot, update: Update):
     bot.send_message(update.message.chat_id, message)
 
 
+def select(bot: Bot, update: Update, args: [str]):
+    bot.send_message(update.message.chat_id, choice(args))
+
+
+
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -375,6 +380,7 @@ def main():
     dispatcher.add_handler(CommandHandler('r', command_roll, pass_args=True, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('coc7', coc7stats, pass_args=True))
     dispatcher.add_handler(CommandHandler('coctrait', coc_trait))
+    dispatcher.add_handler(CommandHandler('decide', select, pass_args=True))
     dispatcher.add_handler(
         CommandHandler('setdice', set_default_dice, pass_args=True, pass_chat_data=True))
     dispatcher.add_error_handler(error)
