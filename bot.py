@@ -278,7 +278,7 @@ def coc_trait(bot: Bot, update: Update):
         "你自幼熟识的人。(例如同学，邻居，幼驯染)",
         "一位名人、偶像或者英雄。当然也许你从未见过他。 (例如电影明星，政治家，音乐家。)",
         "游戏中的另一位调查员伙伴。随机或自选。",
-        "游戏中另一外NPC。详情咨询你的守秘人。",
+        "游戏中另一位NPC。详情咨询你的守秘人。",
     ]
 
     vip_why = [
@@ -367,10 +367,9 @@ def select(bot: Bot, update: Update, args: [str]):
     bot.send_message(update.message.chat_id, choice(args))
 
 
-
-def error(bot, update, error):
+def error(_, update, err):
     """Log Errors caused by Updates."""
-    logger.warning('Update "%s" caused error "%s"', update, error)
+    logger.warning('Update "%s" caused error "%s"', update, err)
 
 
 def main():
