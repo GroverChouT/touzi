@@ -2,7 +2,7 @@ import logging
 import os
 import re
 import secrets
-from random import choice
+from secrets import choice
 from typing import List
 
 from telegram import Bot, Update
