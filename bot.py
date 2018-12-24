@@ -35,7 +35,7 @@ class Dice:
         return [self.roll() for _ in range(dice_num)]
 
     def display(self, roll_result: [int]):
-        result = ", ".join(["{:2}".format(r) for r in roll_result])
+        result = ", ".join(["{}".format(r) for r in roll_result])
         num = len(roll_result)
         if num == 1:
             return "`1d{}` 🎲 `{}`".format(self.face, result)
