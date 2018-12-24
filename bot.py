@@ -40,7 +40,7 @@ class Dice:
         if num == 1:
             return "`1d{}` 🎲 `{}`".format(self.face, result)
         else:
-            return "{}d{}` 🎲 `{}`\nsum: `{}` max: `{}` min: `{}`".format(
+            return "`{}d{}` 🎲 `{}`\nsum: `{}` max: `{}` min: `{}`".format(
                 num, self.face, result, sum(roll_result), max(roll_result), min(roll_result))
 
 
